@@ -8,6 +8,7 @@
 
 ## Documents de référence (à lire en priorité)
 
+- `docs/architecture.md` — carte du projet : modules, dépendances, où trouver quoi par rapport aux documents ci-dessous, parcours de bout en bout d'un objet signé. Point de départ pour se repérer dans le code ; pas une spécification (en cas de contradiction, les documents ci-dessous font foi).
 - `docs/constitution-technique.md` — principes fondateurs, portée des couches (OS/service/appli/protocole), stack retenue.
 - `docs/format-objets-signes.md` — structure exacte des objets, calcul de l'id et de la signature, règles de validation.
 - `docs/protocole-synchronisation.md` — messages échangés entre appareils, gestion du curseur de synchronisation, transports local/distant.
@@ -60,6 +61,8 @@ Règles pratiques :
 ## Manière de travailler
 
 - Avancer par petites étapes correspondant à la roadmap de `docs/constitution-technique.md` (section 10) : format d'objet → stockage local → synchronisation à deux → test de bout en bout sans serveur → première application (`GPS citoyen`).
+- Toute création/suppression/déplacement de module, ou changement de dépendance entre modules, se reflète dans `docs/architecture.md` (carte des modules, graphe de dépendances) **dans le même commit** — jamais en différé.
+- Tout fichier de code doit rester compréhensible à sa seule lecture (lui et ses commentaires) : un commentaire d'en-tête qui explique le rôle du fichier et sa place dans l'architecture, des commentaires sur toute logique non évidente (pas sur ce qu'un nom déjà clair dit lui-même). Cf. les fichiers de `core/objects`/`core/identity` pour le niveau de détail attendu.
 - Une tâche = un commit cohérent et relisible, pas un gros commit qui mélange plusieurs sujets.
 - Sur le code cryptographique en particulier (génération/vérification de signature, canonicalisation JSON), expliquer le raisonnement dans le commit ou en commentaire — ce code doit rester lisible et auditable, pas seulement fonctionnel.
 - En cas d'ambiguïté entre deux implémentations possibles, préférer celle qui colle le plus littéralement à la spécification (`docs/format-objets-signes.md`, `docs/protocole-synchronisation.md`) plutôt qu'une optimisation ou une généralisation non demandée.
