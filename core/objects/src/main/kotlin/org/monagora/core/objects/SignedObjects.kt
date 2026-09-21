@@ -4,6 +4,7 @@ import kotlinx.serialization.json.JsonObject
 import org.monagora.core.identity.Base64Std
 import org.monagora.core.identity.Base64Url
 import org.monagora.core.identity.Ed25519Keys
+import org.monagora.core.identity.GuestSession
 import org.slf4j.LoggerFactory
 
 /**
@@ -34,11 +35,40 @@ object SignedObjects {
         authorPrivateKey: ByteArray,
         createdAt: String,
         payload: JsonObject,
+    ): SignedObject = assemble(type, version, authorPublicKey, createdAt, payload) { bytes ->
+        Ed25519Keys.sign(authorPrivateKey, bytes)
+    }
+
+    /**
+     * Même mécanisme que [create], pour une identité invité (constitution-technique.md,
+     * section 8) : signe avec [GuestSession.sign] plutôt qu'une clé privée fournie
+     * directement — la session invité ne l'expose jamais telle quelle. Ce type
+     * d'objet est un [SignedObject] ordinaire, en tout point identique à un objet
+     * "normal" pour la vérification (`verify` ne fait aucune différence) ; c'est
+     * l'absence de `device_authorization` correspondant à `author` qui permet à une
+     * application de reconnaître après coup qu'il vient d'une identité non
+     * enregistrée (docs/identite-revocation.md, section 9).
+     */
+    fun createAsGuest(
+        type: String,
+        version: Int,
+        session: GuestSession,
+        createdAt: String,
+        payload: JsonObject,
+    ): SignedObject = assemble(type, version, session.publicKey, createdAt, payload) { bytes -> session.sign(bytes) }
+
+    private inline fun assemble(
+        type: String,
+        version: Int,
+        authorPublicKey: ByteArray,
+        createdAt: String,
+        payload: JsonObject,
+        sign: (ByteArray) -> ByteArray,
     ): SignedObject {
         val author = Base64Url.encode(authorPublicKey)
         val bytes = CanonicalEnvelope.bytes(type, version, author, createdAt, payload)
         val id = Sha256.hex(bytes)
-        val signature = Base64Std.encode(Ed25519Keys.sign(authorPrivateKey, bytes))
+        val signature = Base64Std.encode(sign(bytes))
         logger.info("object_created id={} type={}", id, type)
         return SignedObject(type, version, author, createdAt, payload, id, signature)
     }
