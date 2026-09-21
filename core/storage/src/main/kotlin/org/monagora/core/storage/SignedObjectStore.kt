@@ -30,9 +30,14 @@ interface SignedObjectStore {
      *   pour répondre à un `sync_request` (docs/protocole-synchronisation.md,
      *   section 2).
      * @param types liste blanche de `type` à inclure ; `null` = tous les types.
+     * @param author ne retourne que les objets dont `author` correspond exactement
+     *   à cette valeur (clé publique encodée `b64u:...`) ; `null` = tous les auteurs.
+     *   Utilisé par la résolution de confiance (`core/trust`) pour retrouver les
+     *   objets `identity_declaration`/`device_authorization`/`device_revocation`
+     *   publiés par une clé racine donnée (docs/identite-revocation.md, section 4).
      * @return les objets triés par `created_at` croissant, au plus `limit`.
      */
-    fun query(since: String? = null, types: List<String>? = null, limit: Int = 200): List<SignedObject>
+    fun query(since: String? = null, types: List<String>? = null, author: String? = null, limit: Int = 200): List<SignedObject>
 
     /** Nombre total d'objets stockés. */
     fun count(): Long

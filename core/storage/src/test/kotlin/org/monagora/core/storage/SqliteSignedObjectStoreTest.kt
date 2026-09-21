@@ -2,6 +2,7 @@ package org.monagora.core.storage
 
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import org.monagora.core.identity.Ed25519KeyPair
 import org.monagora.core.identity.Ed25519Keys
 import org.monagora.core.objects.SignedObject
 import org.monagora.core.objects.SignedObjects
@@ -20,8 +21,8 @@ class SqliteSignedObjectStoreTest {
     private fun objetSigne(
         type: String = "waste_report",
         createdAt: String = "2026-09-21T10:15:00Z",
+        keyPair: Ed25519KeyPair = Ed25519Keys.generate(),
     ): SignedObject {
-        val keyPair = Ed25519Keys.generate()
         return SignedObjects.create(
             type = type,
             version = 1,
@@ -97,6 +98,22 @@ class SqliteSignedObjectStoreTest {
             val resultat = s.query(types = listOf("vote"))
 
             assertEquals(listOf(vote.id), resultat.map { it.id })
+        }
+    }
+
+    @Test
+    fun `query filtre par author`() {
+        store().use { s ->
+            val alice = Ed25519Keys.generate()
+            val bob = Ed25519Keys.generate()
+            val objetAlice = objetSigne(createdAt = "2026-09-21T09:00:00Z", keyPair = alice)
+            val objetBob = objetSigne(createdAt = "2026-09-21T09:01:00Z", keyPair = bob)
+            s.save(objetAlice)
+            s.save(objetBob)
+
+            val resultat = s.query(author = objetAlice.author)
+
+            assertEquals(listOf(objetAlice.id), resultat.map { it.id })
         }
     }
 

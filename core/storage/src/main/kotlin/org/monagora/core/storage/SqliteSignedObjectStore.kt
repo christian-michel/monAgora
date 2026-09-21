@@ -47,6 +47,7 @@ class SqliteSignedObjectStore(path: String) : SignedObjectStore, AutoCloseable {
             )
             statement.execute("CREATE INDEX IF NOT EXISTS idx_signed_objects_created_at ON signed_objects(created_at)")
             statement.execute("CREATE INDEX IF NOT EXISTS idx_signed_objects_type ON signed_objects(type)")
+            statement.execute("CREATE INDEX IF NOT EXISTS idx_signed_objects_author ON signed_objects(author)")
         }
     }
 
@@ -91,7 +92,7 @@ class SqliteSignedObjectStore(path: String) : SignedObjectStore, AutoCloseable {
         throw e
     }
 
-    override fun query(since: String?, types: List<String>?, limit: Int): List<SignedObject> {
+    override fun query(since: String?, types: List<String>?, author: String?, limit: Int): List<SignedObject> {
         if (types != null && types.isEmpty()) return emptyList()
 
         val conditions = mutableListOf<String>()
@@ -103,6 +104,10 @@ class SqliteSignedObjectStore(path: String) : SignedObjectStore, AutoCloseable {
         if (types != null) {
             conditions.add("type IN (${types.joinToString(",") { "?" }})")
             params.addAll(types)
+        }
+        if (author != null) {
+            conditions.add("author = ?")
+            params.add(author)
         }
         val whereClause = if (conditions.isEmpty()) "" else "WHERE " + conditions.joinToString(" AND ")
         val sql = "SELECT * FROM signed_objects $whereClause ORDER BY created_at ASC LIMIT ?"
@@ -118,7 +123,13 @@ class SqliteSignedObjectStore(path: String) : SignedObjectStore, AutoCloseable {
                 }
             }
         } catch (e: SQLException) {
-            logger.error("object_store_query_failed since={} types={} reason=\"{}\"", since, types, e.message)
+            logger.error(
+                "object_store_query_failed since={} types={} author={} reason=\"{}\"",
+                since,
+                types,
+                author,
+                e.message,
+            )
             throw e
         }
     }
