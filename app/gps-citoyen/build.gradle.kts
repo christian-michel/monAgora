@@ -19,6 +19,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true // pour BuildConfig.DEBUG, cf. MonAgoraApplication
     }
 
     compileOptions {
@@ -40,6 +41,11 @@ dependencies {
     implementation(project(":core:storage-android"))
     implementation(project(":core:sync"))
     implementation(project(":core:sync-android"))
+    implementation(project(":core:logging-android"))
+    // Déclaré directement : aucun module core:* ne l'expose en api (toujours
+    // implementation), donc rien ne le rend transitivement visible ici sans ça —
+    // ce module l'utilise directement (LoggerFactory.getLogger dans MainActivity.kt).
+    implementation("org.slf4j:slf4j-api:2.0.13")
 
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.activity:activity-compose:1.9.2")
@@ -48,9 +54,4 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     debugImplementation("androidx.compose.ui:ui-tooling")
-
-    // Liaison SLF4J -> stdout, choix intérimaire pour ce prototype (pas de
-    // liaison Android-native mûre pour SLF4J 2.x à ce jour) : voir la note
-    // dans MainActivity.kt.
-    implementation("org.slf4j:slf4j-simple:2.0.13")
 }

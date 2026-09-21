@@ -55,6 +55,8 @@ Règles pratiques :
 - Les logs doivent permettre de reconstituer *a posteriori* le parcours complet d'un objet donné (créé quand, par qui, transmis à qui, accepté ou rejeté où) — privilégier des logs structurés (champs clé-valeur) plutôt que du texte libre, pour pouvoir les filtrer par `id` ou par pair.
 - Ne jamais faire dépendre le fonctionnement du programme d'un log (pas d'effet de bord dans un appel de log) — le log est une observation, pas une logique.
 
+**Sur Android**, `app/gps-citoyen` (et toute future application) doit dépendre de `core/logging-android`, pas de `slf4j-simple` : ce module fournit un vrai binding SLF4J vers `android.util.Log`, seul moyen fiable de voir ces logs dans `adb logcat` sur un appareil réel. `MonAgoraApplication` y règle le niveau minimum selon `BuildConfig.DEBUG` (`DEBUG` en build debug — tout devient visible, y compris les DEBUG habituellement filtrés — `INFO` en release) et installe un gestionnaire d'exceptions non rattrapées qui logue la pile avant de laisser planter. `adb logcat` filtré par tag de classe (ex. `adb logcat -s SyncSession:* AndroidSignedObjectStore:*`) est le point d'entrée pour diagnostiquer un comportement inattendu sur les POCO F1.
+
 ## Manière de travailler
 
 - Avancer par petites étapes correspondant à la roadmap de `docs/constitution-technique.md` (section 10) : format d'objet → stockage local → synchronisation à deux → test de bout en bout sans serveur → première application (`GPS citoyen`).
