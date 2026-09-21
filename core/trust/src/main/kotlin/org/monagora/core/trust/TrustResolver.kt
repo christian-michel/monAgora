@@ -76,6 +76,23 @@ class TrustResolver(private val store: SignedObjectStore) {
         return DeviceTrust.Trusted
     }
 
+    /**
+     * Une identité invité (constitution-technique.md, section 8) ne publie jamais
+     * de `device_authorization` — c'est précisément cette absence qui permet de la
+     * reconnaître après coup (docs/identite-revocation.md, section 9). Contrairement
+     * à [resolve], on ne connaît pas de `R` ici : on cherche si `devicePublicKey`
+     * appartient au graphe d'identités durables pour N'IMPORTE QUELLE racine.
+     *
+     * Ne dit rien de la validité de la signature de l'objet évalué lui-même — voir
+     * [SignedObjects.verify] pour ça.
+     */
+    fun isRegisteredDevice(devicePublicKey: String): Boolean =
+        store.query(types = listOf(IdentityObjects.TYPE_DEVICE_AUTHORIZATION), limit = maxCandidates)
+            .any { obj -> IdentityObjects.asDeviceAuthorization(obj)?.devicePubkey == devicePublicKey && SignedObjects.verify(obj) }
+
+    /** Confort : `!isRegisteredDevice(obj.author)`, à partir de l'objet plutôt que de la clé nue. */
+    fun isFromGuestIdentity(obj: SignedObject): Boolean = !isRegisteredDevice(obj.author)
+
     private fun findValidDeviceAuthorization(rootPublicKey: String, devicePublicKey: String): SignedObject? =
         store.query(types = listOf(IdentityObjects.TYPE_DEVICE_AUTHORIZATION), author = rootPublicKey, limit = maxCandidates)
             .firstOrNull { obj ->

@@ -4,9 +4,15 @@ import org.monagora.core.identity.Base64Url
 import org.monagora.core.identity.Ed25519Keys
 import org.monagora.core.objects.identity.DeviceRevocationReason
 import org.monagora.core.objects.identity.IdentityObjects
+import org.monagora.core.identity.GuestSession
+import org.monagora.core.objects.SignedObjects
 import org.monagora.core.storage.SqliteSignedObjectStore
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class TrustResolverTest {
 
@@ -201,6 +207,39 @@ class TrustResolverTest {
             val resultat = TrustResolver(store).resolve(Base64Url.encode(root.publicKey), Base64Url.encode(device.publicKey))
 
             assertEquals(DeviceTrust.Untrusted(DeviceTrust.Reason.NO_DEVICE_AUTHORIZATION), resultat)
+        }
+    }
+
+    @Test
+    fun `une identite invitee n est jamais un appareil enregistre`() {
+        SqliteSignedObjectStore(":memory:").use { store ->
+            val resolver = TrustResolver(store)
+            val session = GuestSession.start()
+            val objetInvite = SignedObjects.createAsGuest(
+                "waste_report", 1, session, "2026-09-21T09:00:00Z",
+                buildJsonObject { put("category", "overflowing_bin") },
+            )
+            store.save(objetInvite)
+
+            assertFalse(resolver.isRegisteredDevice(Base64Url.encode(session.publicKey)))
+            assertTrue(resolver.isFromGuestIdentity(objetInvite))
+        }
+    }
+
+    @Test
+    fun `un appareil dument autorise est reconnu comme enregistre, pour n importe quelle racine`() {
+        SqliteSignedObjectStore(":memory:").use { store ->
+            val root = Ed25519Keys.generate()
+            val device = Ed25519Keys.generate()
+            store.save(
+                IdentityObjects.createDeviceAuthorization(
+                    root.publicKey, root.privateKey, device.publicKey, "2026-09-21T09:00:00Z",
+                ),
+            )
+
+            val resolver = TrustResolver(store)
+
+            assertTrue(resolver.isRegisteredDevice(Base64Url.encode(device.publicKey)))
         }
     }
 }
