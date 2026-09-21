@@ -1,0 +1,29 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+        Localisation approximative/fine par le framework Android standard
+        (android.location.LocationManager), pas les Play Services (Fused
+        Location) : l'appareil cible est e/OS, qui n'embarque pas les services
+        Google (constitution-technique.md, section 1 et section 9 — /e/OS,
+        base LineageOS/AOSP). Toute dépendance à com.google.android.gms serait
+        silencieusement inutilisable sur la cible réelle.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Requise en plus de FINE depuis Android 12 (l'utilisateur peut n'accorder
+         que la position approximative) : voir la vérification CoarseFineLocation
+         de lint. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <application
+        android:label="GPS citoyen"
+        android:theme="@style/Theme.GpsCitoyen">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
