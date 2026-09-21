@@ -60,7 +60,7 @@ Règles pratiques :
 *(à mettre à jour au fil de l'avancement)*
 
 - [x] Format d'objet signé : génération + vérification (Kotlin, sans UI) — `core/objects` (id/canonicalisation RFC 8785, signature Ed25519), `core/identity` (clés, encodage b64/b64u)
-- [ ] Stockage local des objets (SQLite)
+- [x] Stockage local des objets (SQLite) — `core/storage` (dédup par id, requête par `since`/`types`/`limit`) ; implémentation actuelle via driver JDBC desktop, à remplacer par `android.database.sqlite`/Room quand le module `app` Android existera (voir note dans `SqliteSignedObjectStore.kt`)
 - [ ] Synchronisation locale à deux appareils (Wi-Fi Direct/Bluetooth)
 - [ ] Test de bout en bout hors-ligne (deux téléphones, aucun serveur)
 - [ ] Application `GPS citoyen` (signalement géolocalisé et lieux utiles)
