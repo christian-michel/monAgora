@@ -7,7 +7,10 @@ kotlin {
 }
 
 dependencies {
-    implementation(project(":core:objects"))
+    // api, pas implementation : SignedObject (et donc JsonObject) apparaît dans
+    // les signatures publiques de SignedObjectStore (save/findById/query) — même
+    // raisonnement que dans core:objects/build.gradle.kts.
+    api(project(":core:objects"))
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
     // Driver JDBC portable (Linux/Mac/Windows desktop) : voir la note dans
     // SqliteSignedObjectStore.kt sur ses limites côté Android.

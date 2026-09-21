@@ -9,7 +9,10 @@ kotlin {
 
 dependencies {
     implementation(project(":core:identity"))
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
+    // api, pas implementation : SignedObject.payload expose JsonObject dans l'API
+    // publique de ce module — les modules qui en dépendent (core:trust, core:sync)
+    // ont besoin de ce type sur leur propre classpath de compilation.
+    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
     // Canonicalisation JSON RFC 8785 (JCS) : on délègue à une bibliothèque dédiée
     // plutôt que de réimplémenter les règles de tri de clés et de formatage des
     // nombres nous-mêmes (constitution-technique.md, principe 11 : réutilisation
