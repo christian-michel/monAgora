@@ -4,6 +4,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
+/**
+ * Comportement de base attendu d'un [SyncCursorStore] (docs/protocole-synchronisation.md,
+ * section 5), sur l'implémentation JDBC desktop [SqliteSyncCursorStore] :
+ * absence de curseur pour un pair inconnu, écriture/lecture, mise à jour
+ * (upsert) d'un curseur existant, indépendance des curseurs entre pairs.
+ * `:memory:` isole chaque test dans sa propre base SQLite éphémère.
+ */
 class SqliteSyncCursorStoreTest {
 
     private fun store() = SqliteSyncCursorStore(":memory:")

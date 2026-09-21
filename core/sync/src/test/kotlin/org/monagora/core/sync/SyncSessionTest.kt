@@ -18,6 +18,17 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
+/**
+ * Déroulé complet d'une session locale ([SyncSession.run],
+ * docs/protocole-synchronisation.md, section 3) : deux sessions connectées
+ * par des tubes en mémoire ([Pipe], simulant un socket bidirectionnel comme un
+ * vrai Bluetooth RFCOMM sans matériel), échange symétrique des objets de
+ * chaque côté avec mise à jour des curseurs, pagination quand un appareil a
+ * plus d'objets que la limite de requête, et fermeture propre sur `error`
+ * après un message JSON malformé ou une version de protocole incompatible.
+ * Les threads dédiés par session reproduisent l'usage réel (une session par
+ * connexion, jamais sur le thread principal Android — cf. BluetoothSyncClient/Server).
+ */
 class SyncSessionTest {
 
     private fun objetSigne(createdAt: String, note: String = "test"): SignedObject {

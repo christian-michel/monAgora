@@ -4,6 +4,12 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
+/**
+ * Calcul de la marge de sécurité du curseur ([SyncCursor.withSafetyMargin],
+ * docs/protocole-synchronisation.md, section 5) : soustraction de 5 minutes,
+ * y compris quand ça fait changer d'heure, et rejet d'un horodatage qui n'est
+ * pas un ISO 8601 valide (propagé, jamais avalé silencieusement).
+ */
 class SyncCursorTest {
 
     @Test

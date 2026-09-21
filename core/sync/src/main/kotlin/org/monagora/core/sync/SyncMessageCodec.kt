@@ -10,9 +10,10 @@ import org.slf4j.LoggerFactory
  *
  * `decode` ne lance jamais d'exception : un message malformé (JSON invalide,
  * `msg` absent ou inconnu, champ obligatoire manquant) est loggé en WARN et
- * donne `null` — c'est à l'appelant (la couche transport, pas encore
- * implémentée ici) de réagir en envoyant un [SyncError] et en fermant la
- * connexion locale, ou en répondant HTTP 400 côté distant (section 6).
+ * donne `null` — c'est à l'appelant de réagir en envoyant un [SyncError] et
+ * en fermant la connexion locale, ou en répondant HTTP 400 côté distant
+ * (section 6). Côté transport local, c'est [SyncSession.run] qui fait
+ * exactement ça sur un `decode` qui renvoie `null`.
  */
 object SyncMessageCodec {
     private val logger = LoggerFactory.getLogger(SyncMessageCodec::class.java)

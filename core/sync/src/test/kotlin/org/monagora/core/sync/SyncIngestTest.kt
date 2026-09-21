@@ -10,6 +10,14 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
+/**
+ * Procédure de validation/rejet à l'ingestion d'un [SyncResponse]
+ * ([SyncIngest.ingest], docs/protocole-synchronisation.md, section 6) : objets
+ * valides et nouveaux acceptés, signature invalide rejetée et non stockée,
+ * objet déjà connu compté comme dédupliqué (pas accepté), type inconnu de
+ * l'application quand même stocké, et comptage correct sur un lot mixte des
+ * trois catégories (accepted/rejected/deduplicated).
+ */
 class SyncIngestTest {
 
     private fun objetValide(

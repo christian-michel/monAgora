@@ -10,6 +10,13 @@ import java.time.Instant
  * décalage d'horloge entre appareils. La spécification donne "ex. 5 minutes"
  * comme ordre de grandeur, pas une valeur imposée au bit près — reprise telle
  * quelle ici plutôt qu'inventée.
+ *
+ * Objet pur (pas d'I/O) : ne fait que le calcul, appelé par [SyncSession] une
+ * fois la dernière page de sa propre requête reçue (`ourPullDone`), juste
+ * avant d'écrire le résultat dans un [SyncCursorStore]. Pécher par excès de
+ * prudence ici n'est jamais un problème : la déduplication par `id` à
+ * l'ingestion ([SyncIngest]) rend un objet redemandé par erreur inoffensif,
+ * juste un peu de bande passante gaspillée (même section 5).
  */
 object SyncCursor {
     private val SAFETY_MARGIN: Duration = Duration.ofMinutes(5)

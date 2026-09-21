@@ -6,11 +6,16 @@ import java.sql.DriverManager
 import java.sql.SQLException
 
 /**
- * Implémentation SQLite de [SyncCursorStore], même note de portabilité que
+ * Implémentation SQLite de [SyncCursorStore] (docs/protocole-synchronisation.md,
+ * section 5 : curseur par pair). Même note de portabilité que
  * [org.monagora.core.storage.SqliteSignedObjectStore] : driver JDBC desktop
- * (`org.xerial:sqlite-jdbc`), à remplacer par `android.database.sqlite`/Room
- * quand le module `app` Android existera — [SyncCursorStore] est l'interface
- * qui rend ce remplacement mécanique.
+ * (`org.xerial:sqlite-jdbc`), utilisable uniquement en JVM pur (pas sur un
+ * appareil Android réel, cf. docs/architecture.md, section 4) — sert au
+ * développement et aux tests de ce module (`core/sync`) avant qu'un appareil
+ * Android soit disponible. [org.monagora.core.sync.android.AndroidSyncCursorStore]
+ * (module `core/sync-android`) fournit l'équivalent réel via
+ * `android.database.sqlite`, même schéma, même contrat — [SyncCursorStore]
+ * est l'interface qui rend ce remplacement mécanique.
  */
 class SqliteSyncCursorStore(path: String) : SyncCursorStore, AutoCloseable {
     private val logger = LoggerFactory.getLogger(SqliteSyncCursorStore::class.java)
@@ -41,6 +46,9 @@ class SqliteSyncCursorStore(path: String) : SyncCursorStore, AutoCloseable {
 
     override fun setCursor(peerDevicePubkey: String, lastSyncedAt: String) {
         try {
+            // Upsert en une requête (clé primaire = peer_device_pubkey) : un
+            // seul curseur par pair, la valeur la plus récente écrase toujours
+            // la précédente — jamais d'historique à conserver ici.
             connection.prepareStatement(
                 """
                 INSERT INTO sync_cursors (peer_device_pubkey, last_synced_at) VALUES (?, ?)

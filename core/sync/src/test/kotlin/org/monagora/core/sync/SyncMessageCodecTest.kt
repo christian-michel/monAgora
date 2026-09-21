@@ -9,6 +9,15 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNull
 
+/**
+ * (Dé)sérialisation JSON d'un [SyncMessage] ([SyncMessageCodec],
+ * docs/protocole-synchronisation.md, section 2) : aller-retour encode/decode
+ * fidèle pour chaque type de message du vocabulaire (`hello`, `sync_request`,
+ * `sync_response` avec un objet signé réel, `file_request`, `error`),
+ * discrimination correcte via le champ `msg`, et rejet (`null`, jamais
+ * d'exception) d'un JSON syntaxiquement invalide, d'un `msg` inconnu, ou d'un
+ * message auquel il manque un champ obligatoire.
+ */
 class SyncMessageCodecTest {
 
     @Test
