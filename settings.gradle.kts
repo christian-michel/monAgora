@@ -16,6 +16,7 @@ dependencyResolutionManagement {
 rootProject.name = "monagora"
 
 include(":core:identity")
+include(":core:logging-android")
 include(":core:objects")
 include(":core:storage")
 include(":core:storage-android")
