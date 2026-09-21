@@ -1,1 +1,10 @@
+<!--
+    Manifeste requis par l'Android Gradle Plugin pour tout module
+    "com.android.library" (voir build.gradle.kts), même sans rien à y
+    déclarer : ce module ne demande aucune permission, ne définit aucun
+    composant (activité, service...) et n'a pas besoin de <application> —
+    android.util.Log, qu'il enveloppe, fait partie du SDK Android lui-même,
+    pas une capacité à autoriser. Le namespace du module est déclaré dans
+    build.gradle.kts (android.namespace), pas ici.
+-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" />

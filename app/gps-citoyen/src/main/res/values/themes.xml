@@ -1,3 +1,12 @@
 <resources>
+    <!--
+        Thème système minimal de l'activité (référencé par android:theme dans
+        AndroidManifest.xml, sur <application>). L'UI réelle de l'écran est en
+        Jetpack Compose (GpsCitoyenScreen.kt, MaterialTheme.typography/colors
+        Material 3) : ce thème XML ne sert qu'au cadre système autour de la
+        fenêtre Compose (fond avant le premier rendu, barre de statut, etc.),
+        pas au style des composants affichés. NoActionBar : Compose gère lui-même
+        toute sa mise en page (Scaffold), pas besoin de l'ActionBar système.
+    -->
     <style name="Theme.GpsCitoyen" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>

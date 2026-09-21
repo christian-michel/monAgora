@@ -11,8 +11,11 @@ import org.slf4j.spi.SLF4JServiceProvider
  * Fournisseur SLF4J 2.x qui route tous les logs du projet vers
  * `android.util.Log` (donc visibles avec `adb logcat`), plutôt que vers
  * stdout comme `slf4j-simple` — peu fiable pour observer une vraie appli
- * Android en fonctionnement (cf. la note historique dans MainActivity.kt
- * d'app/gps-citoyen, qui utilisait `slf4j-simple` comme "choix intérimaire").
+ * Android en fonctionnement (cf. CLAUDE.md, section Journalisation : toute
+ * application Android du projet doit dépendre de ce module, pas de
+ * `slf4j-simple`, qui reste utilisé seulement en test JVM pur par les autres
+ * modules `core` (identity, objects, storage, sync, trust), cf. leurs
+ * `build.gradle.kts`, `testImplementation`).
  *
  * Découvert automatiquement par le `ServiceLoader` de slf4j-api via
  * `META-INF/services/org.slf4j.spi.SLF4JServiceProvider` — aucun câblage

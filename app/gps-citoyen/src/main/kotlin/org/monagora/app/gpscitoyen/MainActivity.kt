@@ -89,6 +89,10 @@ class MainActivity : ComponentActivity() {
         val hasLocationPermission = mutableStateOf(hasAnyLocationPermission())
         val hasBluetoothPermission = mutableStateOf(hasBluetoothPermission())
         val statusMessage = mutableStateOf<String?>(null)
+        // loadReports() affiche du plus récent au plus ancien (voir sa définition :
+        // elle inverse l'ordre croissant par created_at de store.query, cf.
+        // AndroidSignedObjectStore.query) — cohérent avec reportOverflowingBin() qui
+        // insère un nouveau signalement en tête de liste (add(0, ...)).
         val reports = mutableStateListOf<WasteReportPayload>().apply { addAll(loadReports()) }
         val pairedDevices = mutableStateListOf<BluetoothDevice>()
 
@@ -200,9 +204,16 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Du plus récent au plus ancien : [SignedObjectStore.query] trie par `created_at`
+     * croissant (nécessaire à la pagination du protocole de synchronisation, cf.
+     * `SyncCursor`) — inversé ici uniquement pour l'affichage, cohérent avec
+     * [reportOverflowingBin] qui insère un nouveau signalement en tête de liste.
+     */
     private fun loadReports(): List<WasteReportPayload> =
         store.query(types = listOf(WasteReports.TYPE_WASTE_REPORT))
             .mapNotNull { WasteReports.asWasteReport(it) }
+            .asReversed()
 
     private fun reportOverflowingBin(
         note: String,
@@ -233,6 +244,9 @@ class MainActivity : ComponentActivity() {
         check(SignedObjects.verify(obj)) { "un objet qu'on vient de créer et signer doit se vérifier lui-même" }
         store.save(obj)
 
+        // Insertion en tête (pas en fin, contrairement à l'ordre de loadReports() —
+        // voir la note dans onCreate) : le signalement qu'on vient de créer soi-même
+        // doit rester visible en haut sans avoir à faire défiler la liste.
         reports.add(0, WasteReports.asWasteReport(obj)!!)
         statusMessage.value = "Signalement enregistré."
         logger.info("waste_report_created_from_ui id={}", obj.id)
