@@ -25,6 +25,13 @@
 
 Ces choix sont des simplifications assumées par rapport à une version antérieure du projet, pour rester réalisable en solo/petite équipe. Rust/libp2p/CRDT restent des options futures, seulement si un besoin concret et mesuré apparaît — ne pas les réintroduire par anticipation.
 
+## Environnement de build Android
+
+- `scripts/install-android-sdk.sh` installe le SDK en ligne de commande (cmdline-tools, platform-tools, `build-tools;34.0.0`, `platforms;android-34`) et écrit `local.properties`. Idempotent, à relancer à chaque nouvelle session/conteneur si le SDK n'y est pas déjà (cet environnement de dev est éphémère — rien n'est garanti persister d'une session à l'autre).
+- **Nécessite un accès réseau à `dl.google.com`** — dans un environnement Claude Code on the web, c'est un hôte à autoriser explicitement dans la politique réseau de l'environnement (bloqué par défaut sur certains préréglages), voir https://code.claude.com/docs/en/claude-code-on-the-web. Sans ça, ni `sdkmanager` ni le Android Gradle Plugin (résolu via `google()`, qui redirige in fine vers le même hôte) ne peuvent rien télécharger.
+- `compileSdk`/`targetSdk` = **34** (Android 14), `minSdk` = **26** (Android 8) : choix par défaut raisonnable et large, pas encore confronté à la version d'e/OS réellement installée sur les POCO F1 — à ajuster explicitement une fois qu'on le sait (pas une valeur qui vient de la spec, contrairement au reste du projet).
+- Android Gradle Plugin (`com.android.application`/`com.android.library`) déclaré en `apply false` à la racine, `google()` ajouté aux dépôts — prêt à être appliqué par un futur module `app/<nom_application>`. Vérifié bout en bout (SDK + AGP + Kotlin + build-tools) via un module de test jetable, compilé et supprimé après coup — aucun module Android n'existe encore dans le dépôt, les modules `core/*` restent volontairement du Kotlin/JVM pur (aucun n'utilise d'API `android.*`, donc pas besoin d'être des modules Android pour être utilisés par une future appli).
+
 ## Conventions de code
 
 - Structure de package suggérée : `core/identity`, `core/objects` (création/vérification des objets signés), `core/sync`, `core/storage`, puis `app/<nom_application>` pour chaque application (ex. `app/gps-citoyen`, `app/mon-portefeuille`).
@@ -61,7 +68,8 @@ Règles pratiques :
 
 - [x] Format d'objet signé : génération + vérification (Kotlin, sans UI) — `core/objects` (id/canonicalisation RFC 8785, signature Ed25519), `core/identity` (clés, encodage b64/b64u)
 - [x] Stockage local des objets (SQLite) — `core/storage` (dédup par id, requête par `since`/`types`/`limit`) ; implémentation actuelle via driver JDBC desktop, à remplacer par `android.database.sqlite`/Room quand le module `app` Android existera (voir note dans `SqliteSignedObjectStore.kt`)
-- [ ] Synchronisation locale à deux appareils (Wi-Fi Direct/Bluetooth) — `core/sync` couvre la couche protocole (messages `hello`/`sync_request`/`sync_response`/`file_request`/`file_response`/`error`, curseur par pair, validation+stockage+comptage accepté/rejeté/dédupliqué), testée en JVM pur ; **le transport réel (sockets Wi-Fi Direct/Bluetooth) reste à faire**, nécessite le SDK Android et un test sur les POCO F1
+- [x] SDK Android installé et environnement de build configuré — voir section "Environnement de build Android" ci-dessus ; débloque le reste de la roadmap (transport réel, première appli)
+- [ ] Synchronisation locale à deux appareils (Wi-Fi Direct/Bluetooth) — `core/sync` couvre la couche protocole (messages `hello`/`sync_request`/`sync_response`/`file_request`/`file_response`/`error`, curseur par pair, validation+stockage+comptage accepté/rejeté/dédupliqué), testée en JVM pur ; **le transport réel (sockets Wi-Fi Direct/Bluetooth) reste à faire** — le SDK Android est maintenant disponible, plus bloqué que par le code lui-même
 - [ ] Test de bout en bout hors-ligne (deux téléphones, aucun serveur)
 - [ ] Application `GPS citoyen` (signalement géolocalisé et lieux utiles)
 - [x] Objets d'identité et de révocation (`identity_declaration`, `device_authorization`, `device_revocation`, `identity_revocation`) — `core/objects/identity` (`IdentityObjects` : création + lecture typée des 4 payloads, conforme à `docs/identite-revocation.md` section 3)
