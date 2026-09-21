@@ -1,1 +1,9 @@
+<!--
+    core/storage-android : bibliothèque Android sans composant propre (pas
+    d'Activity/Service/Receiver, pas de permission) — le namespace du module
+    est déjà déclaré dans build.gradle.kts (android.namespace), donc ce
+    manifeste fusionné n'a rien d'autre à porter. Il reste néanmoins requis :
+    l'Android Gradle Plugin exige un AndroidManifest.xml pour tout module
+    `com.android.library`, même vide de contenu utile.
+-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" />

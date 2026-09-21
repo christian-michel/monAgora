@@ -14,15 +14,24 @@ package org.monagora.core.storage
  * la fixe pas non plus, c'est un choix éditorial laissé à l'application
  * (comparer avec le tableau lecture/écriture par application de la même
  * section, explicitement qualifié d'"ajustable librement").
+ *
+ * Deux implémentations, même motif que [org.monagora.core.storage.SignedObjectStore]
+ * (docs/architecture.md, section 4) : [org.monagora.core.storage.SqliteGuestQuota]
+ * (JDBC desktop, ce module) et `AndroidGuestQuota` (`core/storage-android`,
+ * `android.database.sqlite`) — même schéma, même contrat.
  */
 interface GuestQuota {
     /** Nombre d'objets déjà créés en mode invité aujourd'hui (date UTC). */
     fun countToday(): Int
 
     /**
-     * Vérifie la limite puis incrémente le compteur du jour en une seule
-     * opération (évite une fenêtre entre la lecture et l'écriture) — à appeler
-     * juste avant de créer effectivement un objet en mode invité.
+     * Vérifie la limite puis incrémente le compteur du jour, dans un seul appel
+     * de méthode — à appeler juste avant de créer effectivement un objet en
+     * mode invité. Note d'implémentation : les implémentations fournies lisent
+     * le compteur puis l'écrivent en deux opérations SQL séparées (pas de
+     * transaction/verrou explicite) ; correct pour l'usage prévu — un seul
+     * appareil, un seul processus — mais ne garantit pas l'exactitude en cas
+     * d'appels concurrents sur la même connexion/journée.
      *
      * @return `true` et incrémente si `countToday() < dailyLimit` ; `false` et
      *   n'incrémente pas sinon.

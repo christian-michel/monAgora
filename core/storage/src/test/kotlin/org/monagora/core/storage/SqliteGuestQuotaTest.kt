@@ -9,6 +9,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+/**
+ * Couvre [SqliteGuestQuota] : compteur initial à 0, incrémentation tant que la
+ * limite n'est pas atteinte, refus (cas de rejet) une fois la limite atteinte
+ * ou avec une limite de 0, et isolation du compteur d'un jour à l'autre (via
+ * une horloge injectée fixe, cf. le paramètre `clock` du constructeur).
+ */
 class SqliteGuestQuotaTest {
 
     private val jourFixe = Clock.fixed(Instant.parse("2026-09-21T10:00:00Z"), ZoneOffset.UTC)

@@ -41,6 +41,9 @@ class AndroidGuestQuota(
     }
 
     override fun tryConsume(dailyLimit: Int): Boolean {
+        // Lecture (countToday) puis écriture séparée, comme SqliteGuestQuota —
+        // voir la note sur GuestQuota.tryConsume : suffisant pour un seul
+        // appareil/processus, pas garanti sous appels concurrents.
         val current = countToday()
         if (current >= dailyLimit) {
             logger.warn("guest_quota_denied day={} count={} limit={}", today(), current, dailyLimit)

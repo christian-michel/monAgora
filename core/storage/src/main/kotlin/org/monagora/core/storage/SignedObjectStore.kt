@@ -12,6 +12,12 @@ import org.monagora.core.objects.SignedObject
  * objet invalide n'est jamais stocké". Séparer validation et persistance
  * garde chaque module responsable d'une seule chose (constitution-technique.md,
  * section 3).
+ *
+ * Interface implémentée deux fois, un même contrat pour deux plateformes
+ * (docs/architecture.md, section 4, "motif JDBC ↔ Android") : `SqliteSignedObjectStore`
+ * (ce module, JDBC desktop, utilisable en JVM pur pour dev/test) et
+ * `AndroidSignedObjectStore` (`core/storage-android`, `android.database.sqlite` —
+ * remplacement mécanique côté appelant, jamais un second protocole).
  */
 interface SignedObjectStore {
 

@@ -14,6 +14,15 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+/**
+ * Couvre [SqliteSignedObjectStore] : écriture/relecture (`save`/`findById`),
+ * déduplication par `id` (cas de rejet silencieux d'un doublon), filtres de
+ * `query` (`since`, `types` — y compris liste vide, `author`, `limit`) et leur
+ * tri par `created_at`, comptage (`count`), et propagation d'une erreur SQL
+ * (cas d'erreur : écriture après fermeture de la connexion, cf. CLAUDE.md,
+ * section Journalisation — une écriture en échec doit remonter, jamais être
+ * avalée silencieusement).
+ */
 class SqliteSignedObjectStoreTest {
 
     private fun store() = SqliteSignedObjectStore(":memory:")

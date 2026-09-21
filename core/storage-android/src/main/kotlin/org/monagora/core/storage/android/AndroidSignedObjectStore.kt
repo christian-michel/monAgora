@@ -21,6 +21,11 @@ class AndroidSignedObjectStore(context: Context) : SignedObjectStore {
     private val dbHelper = DbOpenHelper(context.applicationContext)
 
     override fun save(obj: SignedObject): Boolean {
+        // Déduplication différente de SqliteSignedObjectStore (qui fait un
+        // findById explicite avant l'INSERT) : ici un seul INSERT avec
+        // CONFLICT_IGNORE sur la clé primaire `id` — la base elle-même refuse
+        // silencieusement le doublon (rowId == -1L) en une seule opération
+        // atomique, sans requête de lecture préalable.
         val values = ContentValues().apply {
             put("id", obj.id)
             put("type", obj.type)
