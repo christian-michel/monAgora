@@ -21,7 +21,7 @@ class AndroidSyncCursorStore(context: Context) : SyncCursorStore {
     private val logger = LoggerFactory.getLogger(AndroidSyncCursorStore::class.java)
     private val helper = OpenHelper(context)
 
-    override fun getCursor(peerDevicePubkey: String): String? {
+    override fun getCursor(peerDevicePubkey: String): String? = try {
         helper.readableDatabase.query(
             "sync_cursors",
             arrayOf("last_synced_at"),
@@ -30,22 +30,28 @@ class AndroidSyncCursorStore(context: Context) : SyncCursorStore {
             null,
             null,
             null,
-        ).use { cursor ->
-            return if (cursor.moveToFirst()) cursor.getString(0) else null
-        }
+        ).use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
+    } catch (e: android.database.SQLException) {
+        logger.error("sync_cursor_read_failed peer={} reason=\"{}\"", peerDevicePubkey, e.message)
+        throw e
     }
 
     override fun setCursor(peerDevicePubkey: String, lastSyncedAt: String) {
-        val values = ContentValues().apply {
-            put("peer_device_pubkey", peerDevicePubkey)
-            put("last_synced_at", lastSyncedAt)
+        try {
+            val values = ContentValues().apply {
+                put("peer_device_pubkey", peerDevicePubkey)
+                put("last_synced_at", lastSyncedAt)
+            }
+            helper.writableDatabase.insertWithOnConflict(
+                "sync_cursors",
+                null,
+                values,
+                SQLiteDatabase.CONFLICT_REPLACE,
+            )
+        } catch (e: android.database.SQLException) {
+            logger.error("sync_cursor_write_failed peer={} reason=\"{}\"", peerDevicePubkey, e.message)
+            throw e
         }
-        helper.writableDatabase.insertWithOnConflict(
-            "sync_cursors",
-            null,
-            values,
-            SQLiteDatabase.CONFLICT_REPLACE,
-        )
         logger.info("sync_cursor_updated peer={} last_synced_at={}", peerDevicePubkey, lastSyncedAt)
     }
 

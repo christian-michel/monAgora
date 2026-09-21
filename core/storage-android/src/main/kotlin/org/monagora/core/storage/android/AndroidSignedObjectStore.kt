@@ -50,7 +50,7 @@ class AndroidSignedObjectStore(context: Context) : SignedObjectStore {
         }
     }
 
-    override fun findById(id: String): SignedObject? =
+    override fun findById(id: String): SignedObject? = try {
         dbHelper.readableDatabase.query(
             "signed_objects",
             null,
@@ -60,6 +60,10 @@ class AndroidSignedObjectStore(context: Context) : SignedObjectStore {
             null,
             null,
         ).use { cursor -> if (cursor.moveToFirst()) cursor.toSignedObject() else null }
+    } catch (e: android.database.SQLException) {
+        logger.error("object_store_read_failed id={} reason=\"{}\"", id, e.message)
+        throw e
+    }
 
     override fun query(since: String?, types: List<String>?, author: String?, limit: Int): List<SignedObject> {
         if (types != null && types.isEmpty()) return emptyList()
@@ -80,27 +84,42 @@ class AndroidSignedObjectStore(context: Context) : SignedObjectStore {
         }
         val whereClause = if (conditions.isEmpty()) null else conditions.joinToString(" AND ")
 
-        return dbHelper.readableDatabase.query(
-            "signed_objects",
-            null,
-            whereClause,
-            if (args.isEmpty()) null else args.toTypedArray(),
-            null,
-            null,
-            "created_at ASC",
-            limit.toString(),
-        ).use { cursor ->
-            val results = mutableListOf<SignedObject>()
-            while (cursor.moveToNext()) results.add(cursor.toSignedObject())
-            results
+        return try {
+            dbHelper.readableDatabase.query(
+                "signed_objects",
+                null,
+                whereClause,
+                if (args.isEmpty()) null else args.toTypedArray(),
+                null,
+                null,
+                "created_at ASC",
+                limit.toString(),
+            ).use { cursor ->
+                val results = mutableListOf<SignedObject>()
+                while (cursor.moveToNext()) results.add(cursor.toSignedObject())
+                results
+            }
+        } catch (e: android.database.SQLException) {
+            logger.error(
+                "object_store_query_failed since={} types={} author={} reason=\"{}\"",
+                since,
+                types,
+                author,
+                e.message,
+            )
+            throw e
         }
     }
 
-    override fun count(): Long =
+    override fun count(): Long = try {
         dbHelper.readableDatabase.rawQuery("SELECT COUNT(*) FROM signed_objects", null).use { cursor ->
             cursor.moveToFirst()
             cursor.getLong(0)
         }
+    } catch (e: android.database.SQLException) {
+        logger.error("object_store_count_failed reason=\"{}\"", e.message)
+        throw e
+    }
 
     private fun android.database.Cursor.toSignedObject(): SignedObject = SignedObject(
         type = getString(getColumnIndexOrThrow("type")),

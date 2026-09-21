@@ -25,7 +25,7 @@ class AndroidGuestQuota(
     private val logger = LoggerFactory.getLogger(AndroidGuestQuota::class.java)
     private val dbHelper = DbOpenHelper(context.applicationContext)
 
-    override fun countToday(): Int =
+    override fun countToday(): Int = try {
         dbHelper.readableDatabase.query(
             "guest_quota",
             arrayOf("count"),
@@ -35,6 +35,10 @@ class AndroidGuestQuota(
             null,
             null,
         ).use { cursor -> if (cursor.moveToFirst()) cursor.getInt(0) else 0 }
+    } catch (e: android.database.SQLException) {
+        logger.error("guest_quota_read_failed day={} reason=\"{}\"", today(), e.message)
+        throw e
+    }
 
     override fun tryConsume(dailyLimit: Int): Boolean {
         val current = countToday()
@@ -43,15 +47,20 @@ class AndroidGuestQuota(
             return false
         }
 
-        val db = dbHelper.writableDatabase
-        val inserted = db.insertWithOnConflict(
-            "guest_quota",
-            null,
-            ContentValues().apply { put("day", today()); put("count", 1) },
-            android.database.sqlite.SQLiteDatabase.CONFLICT_IGNORE,
-        )
-        if (inserted == -1L) {
-            db.execSQL("UPDATE guest_quota SET count = count + 1 WHERE day = ?", arrayOf(today()))
+        try {
+            val db = dbHelper.writableDatabase
+            val inserted = db.insertWithOnConflict(
+                "guest_quota",
+                null,
+                ContentValues().apply { put("day", today()); put("count", 1) },
+                android.database.sqlite.SQLiteDatabase.CONFLICT_IGNORE,
+            )
+            if (inserted == -1L) {
+                db.execSQL("UPDATE guest_quota SET count = count + 1 WHERE day = ?", arrayOf(today()))
+            }
+        } catch (e: android.database.SQLException) {
+            logger.error("guest_quota_write_failed day={} reason=\"{}\"", today(), e.message)
+            throw e
         }
 
         logger.info("guest_quota_consumed day={} count={} limit={}", today(), current + 1, dailyLimit)
