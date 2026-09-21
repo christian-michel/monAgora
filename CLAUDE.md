@@ -59,7 +59,7 @@ Règles pratiques :
 
 *(à mettre à jour au fil de l'avancement)*
 
-- [ ] Format d'objet signé : génération + vérification (Kotlin, sans UI)
+- [x] Format d'objet signé : génération + vérification (Kotlin, sans UI) — `core/objects` (id/canonicalisation RFC 8785, signature Ed25519), `core/identity` (clés, encodage b64/b64u)
 - [ ] Stockage local des objets (SQLite)
 - [ ] Synchronisation locale à deux appareils (Wi-Fi Direct/Bluetooth)
 - [ ] Test de bout en bout hors-ligne (deux téléphones, aucun serveur)
