@@ -134,13 +134,16 @@ class SqliteSignedObjectStore(path: String) : SignedObjectStore, AutoCloseable {
         }
     }
 
-    override fun count(): Long {
+    override fun count(): Long = try {
         connection.createStatement().use { statement ->
             statement.executeQuery("SELECT COUNT(*) FROM signed_objects").use { rs ->
                 rs.next()
-                return rs.getLong(1)
+                rs.getLong(1)
             }
         }
+    } catch (e: SQLException) {
+        logger.error("object_store_count_failed reason=\"{}\"", e.message)
+        throw e
     }
 
     override fun close() = connection.close()
