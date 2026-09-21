@@ -1,5 +1,7 @@
 package org.monagora.app.gpscitoyen
 
+import android.annotation.SuppressLint
+import android.bluetooth.BluetoothDevice
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -26,9 +29,13 @@ import org.monagora.core.objects.wastereport.WasteReportPayload
 @Composable
 fun GpsCitoyenScreen(
     hasLocationPermission: Boolean,
-    onRequestPermission: () -> Unit,
+    onRequestLocationPermission: () -> Unit,
     onReportOverflowingBin: (note: String) -> Unit,
     reports: List<WasteReportPayload>,
+    hasBluetoothPermission: Boolean,
+    onRequestBluetoothPermission: () -> Unit,
+    pairedDevices: List<BluetoothDevice>,
+    onSyncWithDevice: (BluetoothDevice) -> Unit,
     statusMessage: String?,
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
@@ -44,7 +51,7 @@ fun GpsCitoyenScreen(
 
                 if (!hasLocationPermission) {
                     Text("La localisation est nécessaire pour signaler un problème à cet endroit.")
-                    Button(onClick = onRequestPermission) { Text("Autoriser la localisation") }
+                    Button(onClick = onRequestLocationPermission) { Text("Autoriser la localisation") }
                 } else {
                     var note by remember { mutableStateOf("") }
 
@@ -65,6 +72,22 @@ fun GpsCitoyenScreen(
                 statusMessage?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
 
                 HorizontalDivider()
+                Text("Synchronisation (Bluetooth)", style = MaterialTheme.typography.titleMedium)
+
+                if (!hasBluetoothPermission) {
+                    Text("Le Bluetooth est nécessaire pour synchroniser avec un autre appareil, sans serveur.")
+                    Button(onClick = onRequestBluetoothPermission) { Text("Autoriser le Bluetooth") }
+                } else if (pairedDevices.isEmpty()) {
+                    Text("Aucun appareil Bluetooth appairé — appaire d'abord l'autre téléphone depuis les réglages système.")
+                } else {
+                    pairedDevices.forEach { device ->
+                        OutlinedButton(onClick = { onSyncWithDevice(device) }) {
+                            Text("Synchroniser avec ${deviceLabel(device)}")
+                        }
+                    }
+                }
+
+                HorizontalDivider()
                 Text("Signalements connus de cet appareil (${reports.size})", style = MaterialTheme.typography.titleMedium)
 
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -77,3 +100,6 @@ fun GpsCitoyenScreen(
         }
     }
 }
+
+@SuppressLint("MissingPermission") // n'est appelée que quand hasBluetoothPermission est vrai
+private fun deviceLabel(device: BluetoothDevice): String = device.name ?: device.address

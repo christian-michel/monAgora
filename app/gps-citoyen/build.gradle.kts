@@ -38,6 +38,8 @@ dependencies {
     implementation(project(":core:objects"))
     implementation(project(":core:storage"))
     implementation(project(":core:storage-android"))
+    implementation(project(":core:sync"))
+    implementation(project(":core:sync-android"))
 
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.activity:activity-compose:1.9.2")
