@@ -5,6 +5,14 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.test.assertFailsWith
 
+/**
+ * Couvre la génération/signature/vérification de [Ed25519Keys] : signature
+ * valide acceptée, et rejet (sans exception, cf. [Ed25519Keys.verify]) d'un
+ * message modifié, d'une mauvaise clé, ou d'une clé/signature de taille
+ * invalide — sauf pour [Ed25519Keys.sign], où une clé privée de taille
+ * invalide lève bien une exception (paramètre fourni par le code local, pas
+ * par un pair réseau).
+ */
 class Ed25519KeysTest {
 
     @Test

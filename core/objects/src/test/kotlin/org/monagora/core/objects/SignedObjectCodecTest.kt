@@ -8,6 +8,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
+/**
+ * Couvre [SignedObjectCodec.parse] : décodage d'un JSON structurellement
+ * complet, rejet (retour `null`, jamais d'exception) d'un JSON auquel il
+ * manque un champ obligatoire ou syntaxiquement invalide, et tolérance
+ * volontaire d'un champ JSON inconnu en plus des champs attendus.
+ */
 class SignedObjectCodecTest {
 
     private fun objetValide(): SignedObject {

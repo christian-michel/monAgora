@@ -4,6 +4,11 @@ import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
+/**
+ * Couvre l'aller-retour encode/decode de [Base64Std], le préfixage `b64:` (y
+ * compris le rejet d'une valeur préfixée `b64u:` par erreur), et le rejet
+ * (sans exception non gérée) d'un contenu qui n'est pas du Base64 standard valide.
+ */
 class Base64StdTest {
 
     @Test

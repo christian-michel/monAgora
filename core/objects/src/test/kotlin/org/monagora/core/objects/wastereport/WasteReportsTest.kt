@@ -11,6 +11,13 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+/**
+ * Couvre [WasteReports] (docs/format-objets-signes.md, section 5) : création +
+ * vérification + relecture typée du payload en mode normal et en mode invité,
+ * validité d'un signalement sans `note`/`photo_hash` (champs optionnels),
+ * conformité exacte des noms de champs JSON à la spec, et rejet (retour
+ * `null`) quand le `type` ne correspond pas ou qu'un champ obligatoire manque.
+ */
 class WasteReportsTest {
 
     @Test

@@ -8,6 +8,15 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+/**
+ * Couvre [SignedObjects.create]/[SignedObjects.verify] suivant
+ * docs/format-objets-signes.md, section 3 : création et vérification réussies,
+ * rejet si le payload ou la signature sont altérés après coup ou si l'objet
+ * est signé par une clé différente de `author`, non-rejet volontaire d'un
+ * `type` inconnu (portée de `verify` limitée à id/signature), rejet sans
+ * exception si `author`/`signature` ne sont pas du Base64 valide, et stabilité
+ * de l'`id` face à l'ordre de construction du payload (canonicalisation).
+ */
 class SignedObjectsTest {
 
     private val payload = buildJsonObject {

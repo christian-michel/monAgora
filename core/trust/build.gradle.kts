@@ -8,7 +8,13 @@ kotlin {
 
 dependencies {
     api(project(":core:objects"))
-    implementation(project(":core:storage"))
+    // api, pas implementation : le constructeur public de TrustResolver prend un
+    // SignedObjectStore (core:storage) — même motif que kotlinx-serialization-json
+    // dans core/objects et core/storage (docs/architecture.md, section 3). Encore
+    // latent (rien n'instancie TrustResolver depuis un autre module pour l'instant)
+    // mais deviendrait une erreur de compilation dès qu'un module appelant (ex.
+    // app/gps-citoyen) essaierait de construire un TrustResolver.
+    api(project(":core:storage"))
     implementation("org.slf4j:slf4j-api:2.0.13")
 
     testImplementation(kotlin("test-junit5"))

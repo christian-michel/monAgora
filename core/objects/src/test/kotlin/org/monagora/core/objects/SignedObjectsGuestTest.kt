@@ -9,6 +9,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
+/**
+ * Couvre [SignedObjects.createAsGuest] : l'objet produit est un [SignedObject]
+ * ordinaire et vérifiable, la création échoue si la session invité est déjà
+ * fermée, et deux objets créés par la même session restent chacun vérifiables
+ * indépendamment.
+ */
 class SignedObjectsGuestTest {
 
     private val payload = buildJsonObject { put("category", "overflowing_bin") }

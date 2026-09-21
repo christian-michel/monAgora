@@ -1,5 +1,9 @@
 plugins {
     kotlin("jvm")
+    // Génère le code de (dé)sérialisation pour les data class @Serializable
+    // (SignedObject, les payloads identity/wastereport...) — requis en plus
+    // de la bibliothèque kotlinx-serialization-json ci-dessous, qui ne fournit
+    // que le runtime, pas le plugin de compilation.
     kotlin("plugin.serialization")
 }
 
@@ -8,7 +12,13 @@ kotlin {
 }
 
 dependencies {
-    implementation(project(":core:identity"))
+    // api, pas implementation : GuestSession (core:identity) apparaît dans les
+    // signatures publiques de ce module (SignedObjects.createAsGuest,
+    // WasteReports.createAsGuest) — même règle que kotlinx-serialization-json
+    // ci-dessous (docs/architecture.md, section 3). Le socle cryptographique sur
+    // lequel ce module construit le format d'objet signé (encodage b64/b64u,
+    // signature/vérification Ed25519, session invité).
+    api(project(":core:identity"))
     // api, pas implementation : SignedObject.payload expose JsonObject dans l'API
     // publique de ce module — les modules qui en dépendent (core:trust, core:sync)
     // ont besoin de ce type sur leur propre classpath de compilation.

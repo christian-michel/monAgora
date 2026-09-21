@@ -5,6 +5,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
+/**
+ * Couvre l'aller-retour encode/decode de [Base64Url], le préfixage `b64u:`
+ * (y compris son absence de padding, contrairement à [Base64Std]), et le rejet
+ * d'une valeur sans préfixe ou dont le contenu n'est pas du Base64 URL-safe valide.
+ */
 class Base64UrlTest {
 
     @Test

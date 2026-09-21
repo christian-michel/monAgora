@@ -5,6 +5,12 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+/**
+ * Couvre le cycle de vie d'une [GuestSession] : signatures produites
+ * vérifiables, unicité des clés entre deux sessions, et le rejet (exception)
+ * de toute signature demandée après [GuestSession.close], y compris son
+ * idempotence.
+ */
 class GuestSessionTest {
 
     @Test

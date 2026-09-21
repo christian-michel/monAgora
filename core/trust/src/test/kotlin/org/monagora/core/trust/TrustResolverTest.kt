@@ -14,6 +14,20 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+/**
+ * Couvre les trois règles de [TrustResolver.resolve] (docs/identite-revocation.md,
+ * section 4) : appareil autorisé et non révoqué accepté ; rejet si jamais
+ * autorisé, si l'autorisation vise une autre identité, ou si l'appareil est
+ * révoqué (même quand la révocation précède l'autorisation dans le temps, la
+ * règle ignorant volontairement l'horodatage) ; non-effet d'une révocation
+ * visant un autre appareil ; révocation d'identité par la vraie clé de
+ * révocation invalidant tous ses appareils, mais ignorée si signée par une
+ * clé qui n'est pas celle déclarée (ou si aucun `identity_declaration` n'a
+ * jamais été publié) ; défense en profondeur si un objet stocké a une
+ * signature altérée (`save()` ne revérifie pas, `resolve()` si) ; et
+ * [TrustResolver.isRegisteredDevice]/[TrustResolver.isFromGuestIdentity] pour
+ * distinguer un appareil enregistré d'une identité invité.
+ */
 class TrustResolverTest {
 
     @Test

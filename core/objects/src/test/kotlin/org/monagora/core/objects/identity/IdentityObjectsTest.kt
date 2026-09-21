@@ -10,6 +10,15 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+/**
+ * Couvre les quatre types de [IdentityObjects] (docs/identite-revocation.md,
+ * section 3) : création + vérification de signature + relecture typée du
+ * payload pour chacun (y compris chaque valeur de [DeviceRevocationReason]),
+ * le fait qu'`identity_revocation` est bien signée par la clé de révocation et
+ * non par la clé racine, la conformité exacte des noms de champs JSON à la
+ * spec, et le rejet (retour `null`, sans exception) quand le `type` ne
+ * correspond pas ou qu'un champ obligatoire manque dans le payload.
+ */
 class IdentityObjectsTest {
 
     @Test
