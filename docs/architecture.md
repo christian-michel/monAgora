@@ -40,7 +40,7 @@ Chaque module `core/*` existe en une ou deux variantes :
 | `core/storage` | Kotlin/JVM | `core/objects` | Persistance SQLite (driver JDBC desktop) des objets signés + quota invité | `SignedObjectStore` (interface), `SqliteSignedObjectStore`, `GuestQuota` (interface), `SqliteGuestQuota` |
 | `core/storage-android` | Android lib | `core/storage`, `core/objects` | Mêmes interfaces que `core/storage`, implémentées via `android.database.sqlite` | `DbOpenHelper`, `AndroidSignedObjectStore`, `AndroidGuestQuota` |
 | `core/sync` | Kotlin/JVM | `core/objects`, `core/storage` | Protocole de synchronisation : messages, codec JSON, curseur par pair, ingestion (validation+dédup), session complète sur `InputStream`/`OutputStream` génériques | `SyncMessage` (+ sous-types), `SyncMessageCodec`, `SyncCursor`, `SyncCursorStore` (interface), `SqliteSyncCursorStore`, `SyncIngest`, `SyncSession` |
-| `core/sync-android` | Android lib | `core/sync`, `core/storage-android` | Transport Bluetooth RFCOMM (serveur + client) au-dessus de `SyncSession` ; curseur Android | `BluetoothSyncTransport`, `BluetoothSyncServer`, `BluetoothSyncClient`, `AndroidSyncCursorStore` |
+| `core/sync-android` | Android lib | `core/sync`, `core/storage` | Transport Bluetooth RFCOMM (serveur + client) au-dessus de `SyncSession` ; curseur Android (base SQLite dédiée, séparée de celle de `core/storage-android`) | `BluetoothSyncTransport`, `BluetoothSyncServer`, `BluetoothSyncClient`, `AndroidSyncCursorStore` |
 | `core/trust` | Kotlin/JVM | `core/objects`, `core/storage` | Résolution de confiance appareil/identité (`identite-revocation.md`, section 4) | `TrustResolver`, `DeviceTrust` |
 | `core/logging-android` | Android lib | — (SLF4J API seulement) | Binding SLF4J → `android.util.Log`, seuil de log réglable dynamiquement (mode debug) | `AndroidServiceProvider`, `AndroidLoggerFactory`, `AndroidLogger`, `AndroidLogging` |
 | `app/gps-citoyen` | Android app | tous les `core/*` ci-dessus | Première application réelle : signalement géolocalisé + synchro Bluetooth | `MainActivity`, `GpsCitoyenScreen`, `MonAgoraApplication` |
@@ -53,7 +53,8 @@ core/identity
           ├── core/storage
           │      └── core/storage-android
           ├── core/sync ── (utilise core/storage)
-          │      └── core/sync-android ── (utilise core/storage-android)
+          │      └── core/sync-android ── (utilise core/storage — pas core/storage-android :
+          │             base SQLite dédiée à son propre curseur, cf. AndroidSyncCursorStore)
           └── core/trust ── (utilise core/storage)
 
 core/logging-android            (indépendant — juste un binding SLF4J)
