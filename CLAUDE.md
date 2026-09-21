@@ -61,7 +61,7 @@ Règles pratiques :
 
 - [x] Format d'objet signé : génération + vérification (Kotlin, sans UI) — `core/objects` (id/canonicalisation RFC 8785, signature Ed25519), `core/identity` (clés, encodage b64/b64u)
 - [x] Stockage local des objets (SQLite) — `core/storage` (dédup par id, requête par `since`/`types`/`limit`) ; implémentation actuelle via driver JDBC desktop, à remplacer par `android.database.sqlite`/Room quand le module `app` Android existera (voir note dans `SqliteSignedObjectStore.kt`)
-- [ ] Synchronisation locale à deux appareils (Wi-Fi Direct/Bluetooth)
+- [ ] Synchronisation locale à deux appareils (Wi-Fi Direct/Bluetooth) — `core/sync` couvre la couche protocole (messages `hello`/`sync_request`/`sync_response`/`file_request`/`file_response`/`error`, curseur par pair, validation+stockage+comptage accepté/rejeté/dédupliqué), testée en JVM pur ; **le transport réel (sockets Wi-Fi Direct/Bluetooth) reste à faire**, nécessite le SDK Android et un test sur les POCO F1
 - [ ] Test de bout en bout hors-ligne (deux téléphones, aucun serveur)
 - [ ] Application `GPS citoyen` (signalement géolocalisé et lieux utiles)
 - [ ] Objets d'identité et de révocation (`identity_declaration`, `device_authorization`, `device_revocation`, `identity_revocation`)
