@@ -1,0 +1,18 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+        Permissions Bluetooth pour ce module : deux jeux, l'ancien (< Android 12,
+        permissions "normales", accordées à l'installation) et le nouveau
+        (Android 12+, permissions runtime). BLUETOOTH_SCAN n'est volontairement
+        pas demandée : ce module ne fait pas de découverte active, seulement des
+        connexions à des appareils déjà appairés via l'interface Bluetooth
+        standard d'Android (BluetoothAdapter.bondedDevices) — plus simple pour
+        la v0.1 (constitution-technique.md, principe 10), et ça évite d'avoir
+        aussi besoin d'ACCESS_FINE_LOCATION que la découverte active exigerait
+        sur certaines versions d'Android.
+    -->
+    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+</manifest>
